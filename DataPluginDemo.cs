@@ -49,9 +49,14 @@ namespace User.NearlyOnPace
                 public static string rainIntensityIn30min = "RainIntensityIn30min";
             }
 
-            public struct Misc
+            public struct Stint
             {
                 public static string stintAverageLapTime = "StintAverageLaptime";
+                public static string stintAverageLapTimeMs = "StintAverageLaptimeMs";
+            }
+
+            public struct Misc
+            {
                 public static string lastOutlap = "LastOutlap";
                 public static string currentTyreSet = "CurrentTyreSet";
             }
@@ -179,7 +184,8 @@ namespace User.NearlyOnPace
 
             if (data.NewData.CurrentLap > currentStintUpdate.stintOutlap)
             {
-                pluginManager.SetPropertyValue(Props.Misc.stintAverageLapTime, this.GetType(), currentStintUpdate.formattedAverageLapTime());
+                pluginManager.SetPropertyValue(Props.Stint.stintAverageLapTime, this.GetType(), currentStintUpdate.formattedAverageLapTime());
+                pluginManager.SetPropertyValue(Props.Stint.stintAverageLapTimeMs, this.GetType(), currentStintUpdate.averageLapTimeMs());
             }
         }
 
@@ -281,7 +287,8 @@ namespace User.NearlyOnPace
             pluginManager.AddProperty(Props.Weather.rainIntensityIn10min, this.GetType(), -1);
             pluginManager.AddProperty(Props.Weather.rainIntensityIn30min, this.GetType(), -1);
 
-            pluginManager.AddProperty(Props.Misc.stintAverageLapTime, this.GetType(), "-");
+            pluginManager.AddProperty(Props.Stint.stintAverageLapTime, this.GetType(), "-");
+            pluginManager.AddProperty(Props.Stint.stintAverageLapTimeMs, this.GetType(), -1);
         }
     }
 }

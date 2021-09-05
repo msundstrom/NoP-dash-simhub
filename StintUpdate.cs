@@ -63,6 +63,19 @@ namespace User.NearlyOnPace
             return averageTime.Minutes + ":" + averageTime.Seconds + "." + averageTime.Milliseconds;
         }
 
+        public int averageLapTimeMs()
+        {
+            if (lapTimes.Count <= 1)
+            {
+                return -1;
+            }
+
+            //exclude outlap
+            List<TimeSpan> stintLaps = lapTimes.GetRange(1, lapTimes.Count - 2);
+            TimeSpan averageTime = Extensions.Average(stintLaps);
+            return (int)Math.Floor(averageTime.TotalMilliseconds);
+        }
+
         public void update(GameData data)
         {
             lapTimes.Add(data.NewData.LastLapTime);
