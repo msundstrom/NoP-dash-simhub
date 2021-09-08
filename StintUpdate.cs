@@ -45,34 +45,42 @@ namespace User.NearlyOnPace
             stintOutlap = 1;
         }
 
-        public TimeSpan averageLaptime()
+        public TimeSpan? averageLaptime()
         {
-            return Extensions.Average(lapTimes);
+            if (lapTimes.Count < 1)
+            {
+                return null;
+            }
+
+            //exclude outlap
+            List<TimeSpan> stintLaps = lapTimes.GetRange(1, lapTimes.Count - 2);
+            TimeSpan averageTime = Extensions.Average(stintLaps);
+
+            return averageTime;
         }
 
         public String formattedAverageLapTime()
         {
-            if (lapTimes.Count <= 1)
+            if (averageLaptime() == null)
             {
                 return "-";
             }
 
-            //exclude outlap
-            List<TimeSpan> stintLaps = lapTimes.GetRange(1, lapTimes.Count - 2);
-            TimeSpan averageTime = Extensions.Average(stintLaps);
-            return averageTime.Minutes + ":" + averageTime.Seconds + "." + averageTime.Milliseconds;
+            TimeSpan averageTime = (TimeSpan)averageLaptime();
+            return  averageTime.Minutes.ToString("D2") + 
+                    ":" + averageTime.Seconds.ToString("D2") + 
+                    "." + averageTime.Milliseconds.ToString("D3");
         }
 
         public int averageLapTimeMs()
         {
-            if (lapTimes.Count <= 1)
+            if (averageLaptime() == null)
             {
                 return -1;
             }
 
-            //exclude outlap
-            List<TimeSpan> stintLaps = lapTimes.GetRange(1, lapTimes.Count - 2);
-            TimeSpan averageTime = Extensions.Average(stintLaps);
+            TimeSpan averageTime = (TimeSpan)averageLaptime();
+
             return (int)Math.Floor(averageTime.TotalMilliseconds);
         }
 
