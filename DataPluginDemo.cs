@@ -53,11 +53,11 @@ namespace User.NearlyOnPace
             {
                 public static string stintAverageLapTime = "StintAverageLaptime";
                 public static string stintAverageLapTimeMs = "StintAverageLaptimeMs";
+                public static string lastOutlap = "LastOutlap";
             }
 
             public struct Misc
             {
-                public static string lastOutlap = "LastOutlap";
                 public static string currentTyreSet = "CurrentTyreSet";
             }
         }
@@ -135,6 +135,7 @@ namespace User.NearlyOnPace
                 newLapUpdate(pluginManager, data);
             }
 
+            // new stint
             if (data.OldData.IsInPitLane == 1 && data.NewData.IsInPitLane == 0)
             {
                 outlapUpdate(pluginManager, data);
@@ -149,7 +150,7 @@ namespace User.NearlyOnPace
         {
             lastStintUpdate = currentStintUpdate;
             currentStintUpdate = new StintUpdate(data);
-            pluginManager.SetPropertyValue(Props.Misc.lastOutlap, this.GetType(), currentStintUpdate.stintOutlap);
+            pluginManager.SetPropertyValue(Props.Stint.lastOutlap, this.GetType(), currentStintUpdate.stintOutlap);
         }
 
         private void newLapUpdate(PluginManager pluginManager, GameData data)
@@ -289,6 +290,7 @@ namespace User.NearlyOnPace
 
             pluginManager.AddProperty(Props.Stint.stintAverageLapTime, this.GetType(), "-");
             pluginManager.AddProperty(Props.Stint.stintAverageLapTimeMs, this.GetType(), -1);
+            pluginManager.AddProperty(Props.Stint.lastOutlap, this.GetType(), -1);
         }
     }
 }
