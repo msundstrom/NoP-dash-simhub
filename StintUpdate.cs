@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 public static class Extensions
 {   public static TimeSpan Average(this IEnumerable<TimeSpan> timeSpans)
     {
-        IEnumerable<long> ticksPerTimeSpan = timeSpans.Select(t => t.Ticks);
-        double averageTicks = ticksPerTimeSpan.Average();
-        long averageTicksLong = Convert.ToInt64(averageTicks);
+        IEnumerable<double> ticksPerTimeSpan = timeSpans.Select(t => t.TotalMilliseconds);
+        double averageMs = ticksPerTimeSpan.Average();
 
-        TimeSpan averageTimeSpan = TimeSpan.FromTicks(averageTicksLong);
+        TimeSpan averageTimeSpan = TimeSpan.FromMilliseconds(averageMs);
 
         return averageTimeSpan;
     }
@@ -53,7 +52,7 @@ namespace User.NearlyOnPace
             }
 
             //exclude outlap
-            List<TimeSpan> stintLaps = lapTimes.GetRange(1, lapTimes.Count - 2);
+            List<TimeSpan> stintLaps = lapTimes.GetRange(1, lapTimes.Count - 1);
             TimeSpan averageTime = Extensions.Average(stintLaps);
 
             return averageTime;
