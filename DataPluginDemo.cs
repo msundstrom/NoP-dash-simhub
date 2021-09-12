@@ -1,9 +1,41 @@
 ﻿using GameReaderCommon;
 using SimHub.Plugins;
 using System;
-using System.IO;
-using System.IO.MemoryMappedFiles;
-using System.Runtime.InteropServices;
+using ExtensionMethods;
+using static User.NearlyOnPace.SharedMemoryReader;
+
+namespace ExtensionMethods
+{
+    public static class MyExtensions
+    {
+        public static void updateProp(this PluginManager manager, string propName, int propValue)
+        {
+            manager.SetPropertyValue(propName, typeof(User.NearlyOnPace.NearlyOnPace), propValue);
+        }
+        public static void updateProp(this PluginManager manager, string propName, double propValue)
+        {
+            manager.SetPropertyValue(propName, typeof(User.NearlyOnPace.NearlyOnPace), propValue);
+        }
+
+        public static void updateProp(this PluginManager manager, string propName, string propValue)
+        {
+            manager.SetPropertyValue(propName, typeof(User.NearlyOnPace.NearlyOnPace), propValue);
+        }
+
+        public static void addProp(this PluginManager manager, string propName, int defaultValue)
+        {
+            manager.AddProperty(propName, typeof(User.NearlyOnPace.NearlyOnPace), defaultValue);
+        }
+        public static void addProp(this PluginManager manager, string propName, double defaultValue)
+        {
+            manager.AddProperty(propName, typeof(User.NearlyOnPace.NearlyOnPace), defaultValue);
+        }
+        public static void addProp(this PluginManager manager, string propName, string defaultValue)
+        {
+            manager.AddProperty(propName, typeof(User.NearlyOnPace.NearlyOnPace), defaultValue);
+        }
+    }
+}
 
 namespace User.NearlyOnPace
 {
@@ -12,10 +44,7 @@ namespace User.NearlyOnPace
     [PluginName("NearlyOnPace")]
     public class NearlyOnPace : IPlugin, IDataPlugin, IWPFSettings
     {
-        enum AC_MEMORY_STATUS { DISCONNECTED, CONNECTING, CONNECTED }
-
-        private MemoryMappedFile graphicsMMF;
-        private AC_MEMORY_STATUS memoryStatus = AC_MEMORY_STATUS.DISCONNECTED;
+        
 
         private LapUpdate currentLapUpdate;
         private StintUpdate currentStintUpdate;
@@ -25,38 +54,9 @@ namespace User.NearlyOnPace
         /// </summary>
         public PluginManager PluginManager { get; set; }
 
-        private bool ConnectToSharedMemory()
-        {
-            try
-            {
-                memoryStatus = AC_MEMORY_STATUS.CONNECTING;
-                // Connect to shared memory
-                graphicsMMF = MemoryMappedFile.OpenExisting("Local\\acpmf_graphics");
+        private SharedMemoryReader memoryReader;
 
-                memoryStatus = AC_MEMORY_STATUS.CONNECTED;
-                return true;
-            }
-            catch (FileNotFoundException)
-            {
-                return false;
-            }
-        }
-
-        public Graphics readGraphics()
-        {
-            var size = Marshal.SizeOf(typeof(Graphics));
-            using (var stream = graphicsMMF.CreateViewStream(0, size))
-            {
-                using (var reader = new BinaryReader(stream))
-                {
-                    var bytes = reader.ReadBytes(size);
-                    var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-                    var data = (Graphics)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(Graphics));
-                    handle.Free();
-                    return data;
-                }
-            }
-        }
+        
 
         /// <summary>
         /// Called one time per game data update, contains all normalized game data, 
@@ -69,15 +69,17 @@ namespace User.NearlyOnPace
         /// <param name="data"></param>
         public void DataUpdate(PluginManager pluginManager, ref GameData data)
         {
-            if (memoryStatus == AC_MEMORY_STATUS.DISCONNECTED || graphicsMMF == null || !data.GameRunning)
+            if (!data.GameRunning)
             {
-                if (!ConnectToSharedMemory())
-                {
-                    return;
-                }
+                return;
             }
 
-            Graphics currentGraphics = readGraphics();
+            Graphics? currentGraphics = memoryReader.readGraphics();
+
+            if (currentGraphics == null)
+            {
+                return;
+            }
 
             // new lap
             if (data.OldData.CurrentLap < data.NewData.CurrentLap)
@@ -92,7 +94,7 @@ namespace User.NearlyOnPace
             }
 
             // other, constant updates
-            updateConstants(pluginManager, currentGraphics);
+            updateConstants(pluginManager, (Graphics)currentGraphics);
             updateAggregates(data);
         }
 
@@ -104,47 +106,24 @@ namespace User.NearlyOnPace
 
         private void newLapUpdate(PluginManager pluginManager, GameData data)
         {
-            LapUpdate.Wheels averagePsi = currentLapUpdate.averagePressures();
-            pluginManager.SetPropertyValue(Properties.PSI.lastLapAverageFL, this.GetType(), averagePsi.FL);
-            pluginManager.SetPropertyValue(Properties.PSI.lastLapAverageFR, this.GetType(), averagePsi.FR);
-            pluginManager.SetPropertyValue(Properties.PSI.lastLapAverageRL, this.GetType(), averagePsi.RL);
-            pluginManager.SetPropertyValue(Properties.PSI.lastLapAverageRR, this.GetType(), averagePsi.RR);
-
-            LapUpdate.Wheels maxPsi = currentLapUpdate.maxPressures();
-            pluginManager.SetPropertyValue(Properties.PSI.lastLapMaxFL, this.GetType(), maxPsi.FL);
-            pluginManager.SetPropertyValue(Properties.PSI.lastLapMaxFR, this.GetType(), maxPsi.FR);
-            pluginManager.SetPropertyValue(Properties.PSI.lastLapMaxRL, this.GetType(), maxPsi.RL);
-            pluginManager.SetPropertyValue(Properties.PSI.lastLapMaxRR, this.GetType(), maxPsi.RR);
-
-            LapUpdate.Wheels averageTemp = currentLapUpdate.averageTemps();
-            pluginManager.SetPropertyValue(Properties.Temp.lastLapAverageFL, this.GetType(), averageTemp.FL);
-            pluginManager.SetPropertyValue(Properties.Temp.lastLapAverageFR, this.GetType(), averageTemp.FR);
-            pluginManager.SetPropertyValue(Properties.Temp.lastLapAverageRL, this.GetType(), averageTemp.RL);
-            pluginManager.SetPropertyValue(Properties.Temp.lastLapAverageRR, this.GetType(), averageTemp.RR);
-
-            LapUpdate.Wheels maxTemp = currentLapUpdate.maxTemps();
-            pluginManager.SetPropertyValue(Properties.Temp.lastLapMaxFL, this.GetType(), maxTemp.FL);
-            pluginManager.SetPropertyValue(Properties.Temp.lastLapMaxFR, this.GetType(), maxTemp.FR);
-            pluginManager.SetPropertyValue(Properties.Temp.lastLapMaxRL, this.GetType(), maxTemp.RL);
-            pluginManager.SetPropertyValue(Properties.Temp.lastLapMaxRR, this.GetType(), maxTemp.RR);
-
+            currentLapUpdate.updateSimhubProps(pluginManager);
+            
             currentLapUpdate = new LapUpdate(data.NewData.CurrentLap);
 
             currentStintUpdate.update(data);
 
             if (data.NewData.CurrentLap > currentStintUpdate.stintOutlap)
             {
-                pluginManager.SetPropertyValue(Properties.Stint.stintAverageLapTime, this.GetType(), currentStintUpdate.formattedAverageLapTime());
-                pluginManager.SetPropertyValue(Properties.Stint.stintAverageLapTimeMs, this.GetType(), currentStintUpdate.averageLapTimeMs());
+                currentStintUpdate.updateSimhubProps(pluginManager);
             }
         }
 
         private void updateConstants(PluginManager pluginManager, Graphics currentGraphics)
         {
-            pluginManager.SetPropertyValue(Properties.Misc.currentTyreSet, this.GetType(), currentGraphics.currentTyreSet);
-            pluginManager.SetPropertyValue(Properties.Weather.rainIntensity, this.GetType(), currentGraphics.rainIntensity);
-            pluginManager.SetPropertyValue(Properties.Weather.rainIntensityIn10min, this.GetType(), currentGraphics.rainIntensityIn10min);
-            pluginManager.SetPropertyValue(Properties.Weather.rainIntensityIn30min, this.GetType(), currentGraphics.rainIntensityIn30min);
+            pluginManager.updateProp(Properties.Misc.currentTyreSet, currentGraphics.currentTyreSet);
+            pluginManager.updateProp(Properties.Weather.rainIntensity, (int)currentGraphics.rainIntensity);
+            pluginManager.updateProp(Properties.Weather.rainIntensityIn10min, (int)currentGraphics.rainIntensityIn10min);
+            pluginManager.updateProp(Properties.Weather.rainIntensityIn30min, (int)currentGraphics.rainIntensityIn30min);
         }
 
         private void updateAggregates(GameData data)
@@ -203,43 +182,43 @@ namespace User.NearlyOnPace
 
             currentLapUpdate = new LapUpdate(1);
             currentStintUpdate = new StintUpdate();
-
-            ConnectToSharedMemory();
+            memoryReader = new SharedMemoryReader();
 
             registerProps(pluginManager);
         }
 
-        public void registerProps(PluginManager pluginManager)
+        private void registerProps(PluginManager pluginManager)
         {
-            pluginManager.AddProperty(Properties.Misc.currentTyreSet, this.GetType(), -1);
 
-            pluginManager.AddProperty(Properties.PSI.lastLapAverageFL, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.PSI.lastLapAverageFR, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.PSI.lastLapAverageRL, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.PSI.lastLapAverageRR, this.GetType(), -1);
+            pluginManager.addProp(Properties.Misc.currentTyreSet, -1);
 
-            pluginManager.AddProperty(Properties.PSI.lastLapMaxFL, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.PSI.lastLapMaxFR, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.PSI.lastLapMaxRL, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.PSI.lastLapMaxRR, this.GetType(), -1);
+            pluginManager.addProp(Properties.PSI.lastLapAverageFL, -1);
+            pluginManager.addProp(Properties.PSI.lastLapAverageFR, -1);
+            pluginManager.addProp(Properties.PSI.lastLapAverageRL, -1);
+            pluginManager.addProp(Properties.PSI.lastLapAverageRR, -1);
 
-            pluginManager.AddProperty(Properties.Temp.lastLapAverageFL, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.Temp.lastLapAverageFR, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.Temp.lastLapAverageRL, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.Temp.lastLapAverageRR, this.GetType(), -1);
+            pluginManager.addProp(Properties.PSI.lastLapMaxFL, -1);
+            pluginManager.addProp(Properties.PSI.lastLapMaxFR, -1);
+            pluginManager.addProp(Properties.PSI.lastLapMaxRL, -1);
+            pluginManager.addProp(Properties.PSI.lastLapMaxRR, -1);
 
-            pluginManager.AddProperty(Properties.Temp.lastLapMaxFL, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.Temp.lastLapMaxFR, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.Temp.lastLapMaxRL, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.Temp.lastLapMaxRR, this.GetType(), -1);
+            pluginManager.addProp(Properties.Temp.lastLapAverageFL, -1);
+            pluginManager.addProp(Properties.Temp.lastLapAverageFR, -1);
+            pluginManager.addProp(Properties.Temp.lastLapAverageRL, -1);
+            pluginManager.addProp(Properties.Temp.lastLapAverageRR, -1);
 
-            pluginManager.AddProperty(Properties.Weather.rainIntensity, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.Weather.rainIntensityIn10min, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.Weather.rainIntensityIn30min, this.GetType(), -1);
+            pluginManager.addProp(Properties.Temp.lastLapMaxFL, -1);
+            pluginManager.addProp(Properties.Temp.lastLapMaxFR, -1);
+            pluginManager.addProp(Properties.Temp.lastLapMaxRL, -1);
+            pluginManager.addProp(Properties.Temp.lastLapMaxRR, -1);
 
-            pluginManager.AddProperty(Properties.Stint.stintAverageLapTime, this.GetType(), "-");
-            pluginManager.AddProperty(Properties.Stint.stintAverageLapTimeMs, this.GetType(), -1);
-            pluginManager.AddProperty(Properties.Stint.lastOutlap, this.GetType(), -1);
+            pluginManager.addProp(Properties.Weather.rainIntensity, -1);
+            pluginManager.addProp(Properties.Weather.rainIntensityIn10min, -1);
+            pluginManager.addProp(Properties.Weather.rainIntensityIn30min, -1);
+
+            pluginManager.addProp(Properties.Stint.stintAverageLapTime, "-");
+            pluginManager.addProp(Properties.Stint.stintAverageLapTimeMs, -1);
+            pluginManager.addProp(Properties.Stint.lastOutlap, -1);
         }
     }
 }

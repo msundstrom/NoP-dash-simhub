@@ -1,4 +1,6 @@
-﻿using GameReaderCommon;
+﻿using ExtensionMethods;
+using GameReaderCommon;
+using SimHub.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,6 +88,11 @@ namespace User.NearlyOnPace
         public void update(GameData data)
         {
             lapTimes.Add(data.NewData.LastLapTime);
+        }
+        public void updateSimhubProps(PluginManager pluginManager)
+        {
+            pluginManager.updateProp(Properties.Stint.stintAverageLapTime, formattedAverageLapTime());
+            pluginManager.updateProp(Properties.Stint.stintAverageLapTimeMs, averageLapTimeMs());
         }
     }
 }

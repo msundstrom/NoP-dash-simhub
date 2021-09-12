@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using ExtensionMethods;
+using SimHub.Plugins;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace User.NearlyOnPace
@@ -69,6 +71,33 @@ namespace User.NearlyOnPace
             double rrAvg = tyreTemperatures.Select(wheel => wheel.RR).ToArray().Average();
 
             return new Wheels(flAvg, frAvg, rlAvg, rrAvg);
+        }
+
+        public void updateSimhubProps(PluginManager pluginManager)
+        {
+            LapUpdate.Wheels averagePsi = averagePressures();
+            pluginManager.updateProp(Properties.PSI.lastLapAverageFL, averagePsi.FL);
+            pluginManager.updateProp(Properties.PSI.lastLapAverageFR, averagePsi.FR);
+            pluginManager.updateProp(Properties.PSI.lastLapAverageRL, averagePsi.RL);
+            pluginManager.updateProp(Properties.PSI.lastLapAverageRR, averagePsi.RR);
+
+            LapUpdate.Wheels maxPsi = maxPressures();
+            pluginManager.updateProp(Properties.PSI.lastLapMaxFL, maxPsi.FL);
+            pluginManager.updateProp(Properties.PSI.lastLapMaxFR, maxPsi.FR);
+            pluginManager.updateProp(Properties.PSI.lastLapMaxRL, maxPsi.RL);
+            pluginManager.updateProp(Properties.PSI.lastLapMaxRR, maxPsi.RR);
+
+            LapUpdate.Wheels averageTemp = averageTemps();
+            pluginManager.updateProp(Properties.PSI.lastLapAverageFL, averageTemp.FL);
+            pluginManager.updateProp(Properties.PSI.lastLapAverageFR, averageTemp.FR);
+            pluginManager.updateProp(Properties.PSI.lastLapAverageRL, averageTemp.RL);
+            pluginManager.updateProp(Properties.PSI.lastLapAverageRR, averageTemp.RR);
+
+            LapUpdate.Wheels maxTemp = maxTemps();
+            pluginManager.updateProp(Properties.PSI.lastLapMaxFL, maxTemp.FL);
+            pluginManager.updateProp(Properties.PSI.lastLapMaxFR, maxTemp.FR);
+            pluginManager.updateProp(Properties.PSI.lastLapMaxRL, maxTemp.RL);
+            pluginManager.updateProp(Properties.PSI.lastLapMaxRR, maxTemp.RR);
         }
     }
 }
