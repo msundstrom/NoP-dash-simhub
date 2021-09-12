@@ -68,7 +68,6 @@ namespace User.NearlyOnPace
 
         private LapUpdate currentLapUpdate;
 
-        private StintUpdate lastStintUpdate;
         private StintUpdate currentStintUpdate;
 
 
@@ -124,7 +123,10 @@ namespace User.NearlyOnPace
         {
             if (memoryStatus == AC_MEMORY_STATUS.DISCONNECTED || graphicsMMF == null || !data.GameRunning)
             {
-                return;
+                if (!ConnectToSharedMemory())
+                {
+                    return;
+                }
             }
 
             Graphics currentGraphics = readGraphics();
@@ -148,7 +150,6 @@ namespace User.NearlyOnPace
 
         private void outlapUpdate(PluginManager pluginManager, GameData data)
         {
-            lastStintUpdate = currentStintUpdate;
             currentStintUpdate = new StintUpdate(data);
             pluginManager.SetPropertyValue(Props.Stint.lastOutlap, this.GetType(), currentStintUpdate.stintOutlap);
         }
