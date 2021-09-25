@@ -81,10 +81,17 @@ namespace User.NearlyOnPace
                 return;
             }
 
+            Physics? currentPhysics = memoryReader.readPhysics();
+
+            if (currentPhysics == null)
+            {
+                return;
+            }
+
             // new lap
             if (data.OldData.CurrentLap < data.NewData.CurrentLap)
             {
-                newLapUpdate(pluginManager, data);
+                newLapUpdate(pluginManager, data, (Physics)currentPhysics);
             }
 
             // new stint
@@ -94,8 +101,12 @@ namespace User.NearlyOnPace
             }
 
             // other, constant updates
-            updateConstants(pluginManager, (Graphics)currentGraphics);
-            updateAggregates(data);
+            updateConstants(pluginManager, (Graphics)currentGraphics, (Physics)currentPhysics);
+
+            if (currentLapUpdate != null)
+            {
+                currentLapUpdate.updateSimhubProps(data);
+            }
         }
 
         private void outlapUpdate(PluginManager pluginManager, GameData data)
@@ -104,51 +115,30 @@ namespace User.NearlyOnPace
             pluginManager.SetPropertyValue(Properties.Stint.lastOutlap, this.GetType(), currentStintUpdate.stintOutlap);
         }
 
-        private void newLapUpdate(PluginManager pluginManager, GameData data)
+        private void newLapUpdate(PluginManager pluginManager, GameData data, Physics physics)
         {
-            currentLapUpdate.updateSimhubProps(pluginManager);
+            currentLapUpdate.writeSimhubProps(pluginManager);
             
             currentLapUpdate = new LapUpdate(data.NewData.CurrentLap);
 
-            currentStintUpdate.update(data);
+            currentStintUpdate.updateSimhubProps(data);
+            currentStintUpdate.updatePhysicsProps(physics);
 
             if (data.NewData.CurrentLap > currentStintUpdate.stintOutlap)
             {
-                currentStintUpdate.updateSimhubProps(pluginManager);
+                currentStintUpdate.writeSimhubProps(pluginManager);
             }
         }
 
-        private void updateConstants(PluginManager pluginManager, Graphics currentGraphics)
+        private void updateConstants(PluginManager pluginManager, Graphics currentGraphics, Physics currentPhysics)
         {
             pluginManager.updateProp(Properties.Misc.currentTyreSet, currentGraphics.currentTyreSet);
+            pluginManager.updateProp(Properties.Misc.frontBrakePad, currentPhysics.fontBrakeCompound);
+            pluginManager.updateProp(Properties.Misc.rearBrakePad, currentPhysics.rearBrakeCompound);
+            pluginManager.updateProp(Properties.Weather.trackCondition, currentGraphics.trackStatus);
             pluginManager.updateProp(Properties.Weather.rainIntensity, (int)currentGraphics.rainIntensity);
             pluginManager.updateProp(Properties.Weather.rainIntensityIn10min, (int)currentGraphics.rainIntensityIn10min);
             pluginManager.updateProp(Properties.Weather.rainIntensityIn30min, (int)currentGraphics.rainIntensityIn30min);
-        }
-
-        private void updateAggregates(GameData data)
-        {
-            if (currentLapUpdate != null)
-            {
-                // update aggregated data
-                currentLapUpdate.tyrePressures.Add(
-                    new LapUpdate.Wheels(
-                        data.NewData.TyrePressureFrontLeft,
-                        data.NewData.TyrePressureFrontRight,
-                        data.NewData.TyrePressureRearLeft,
-                        data.NewData.TyrePressureRearRight
-                    )
-                );
-
-                currentLapUpdate.tyreTemperatures.Add(
-                    new LapUpdate.Wheels(
-                        data.NewData.TyreTemperatureFrontLeft,
-                        data.NewData.TyreTemperatureFrontRight,
-                        data.NewData.TyreTemperatureRearLeft,
-                        data.NewData.TyreTemperatureRearRight
-                    )
-                );
-            }
         }
 
         /// <summary>
@@ -191,6 +181,8 @@ namespace User.NearlyOnPace
         {
 
             pluginManager.addProp(Properties.Misc.currentTyreSet, -1);
+            pluginManager.addProp(Properties.Misc.frontBrakePad, -1);
+            pluginManager.addProp(Properties.Misc.rearBrakePad, -1);
 
             pluginManager.addProp(Properties.PSI.lastLapAverageFL, -1);
             pluginManager.addProp(Properties.PSI.lastLapAverageFR, -1);
@@ -212,6 +204,7 @@ namespace User.NearlyOnPace
             pluginManager.addProp(Properties.Temp.lastLapMaxRL, -1);
             pluginManager.addProp(Properties.Temp.lastLapMaxRR, -1);
 
+            pluginManager.addProp(Properties.Weather.trackCondition, "");
             pluginManager.addProp(Properties.Weather.rainIntensity, -1);
             pluginManager.addProp(Properties.Weather.rainIntensityIn10min, -1);
             pluginManager.addProp(Properties.Weather.rainIntensityIn30min, -1);
@@ -219,6 +212,20 @@ namespace User.NearlyOnPace
             pluginManager.addProp(Properties.Stint.stintAverageLapTime, "-");
             pluginManager.addProp(Properties.Stint.stintAverageLapTimeMs, -1);
             pluginManager.addProp(Properties.Stint.lastOutlap, -1);
+            pluginManager.addProp(Properties.Stint.brakePadAverageWearFL, -1.0);
+            pluginManager.addProp(Properties.Stint.brakePadAverageWearFR, -1.0);
+            pluginManager.addProp(Properties.Stint.brakePadAverageWearRL, -1.0);
+            pluginManager.addProp(Properties.Stint.brakePadAverageWearRR, -1.0);
+            pluginManager.addProp(Properties.Stint.brakeDiscAverageWearFL, -1.0);
+            pluginManager.addProp(Properties.Stint.brakeDiscAverageWearFR, -1.0);
+            pluginManager.addProp(Properties.Stint.brakeDiscAverageWearRL, -1.0);
+            pluginManager.addProp(Properties.Stint.brakeDiscAverageWearRR, -1.0);
+            pluginManager.addProp(Properties.Stint.brakeWearLapCount, -1);
+
+            pluginManager.addProp(Properties.Stint.brakePadPredictedLifeFL, -1);
+            pluginManager.addProp(Properties.Stint.brakePadPredictedLifeFR, -1);
+            pluginManager.addProp(Properties.Stint.brakePadPredictedLifeRL, -1);
+            pluginManager.addProp(Properties.Stint.brakePadPredictedLifeRR, -1);
         }
     }
 }

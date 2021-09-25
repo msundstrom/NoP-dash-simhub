@@ -1,4 +1,5 @@
 ﻿using ExtensionMethods;
+using GameReaderCommon;
 using SimHub.Plugins;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,7 +74,28 @@ namespace User.NearlyOnPace
             return new Wheels(flAvg, frAvg, rlAvg, rrAvg);
         }
 
-        public void updateSimhubProps(PluginManager pluginManager)
+        public void updateSimhubProps(GameData data)
+        {
+            tyrePressures.Add(
+                new LapUpdate.Wheels(
+                    data.NewData.TyrePressureFrontLeft,
+                    data.NewData.TyrePressureFrontRight,
+                    data.NewData.TyrePressureRearLeft,
+                    data.NewData.TyrePressureRearRight
+                )
+            );
+
+            tyreTemperatures.Add(
+                new LapUpdate.Wheels(
+                    data.NewData.TyreTemperatureFrontLeft,
+                    data.NewData.TyreTemperatureFrontRight,
+                    data.NewData.TyreTemperatureRearLeft,
+                    data.NewData.TyreTemperatureRearRight
+                )
+            );
+        }
+
+        public void writeSimhubProps(PluginManager pluginManager)
         {
             LapUpdate.Wheels averagePsi = averagePressures();
             pluginManager.updateProp(Properties.PSI.lastLapAverageFL, averagePsi.FL);
