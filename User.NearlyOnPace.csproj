@@ -73,6 +73,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Physics.cs" />
     <Compile Include="SharedMemoryReader.cs" />
     <Compile Include="Properties.cs" />
     <Compile Include="StintUpdate.cs" />
