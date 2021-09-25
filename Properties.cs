@@ -37,6 +37,7 @@ namespace User.NearlyOnPace
 
         public struct Weather
         {
+            public static string trackCondition = "TrackCondition";
             public static string rainIntensity = "RainIntensity";
             public static string rainIntensityIn10min = "RainIntensityIn10min";
             public static string rainIntensityIn30min = "RainIntensityIn30min";
@@ -47,11 +48,29 @@ namespace User.NearlyOnPace
             public static string stintAverageLapTime = "StintAverageLaptime";
             public static string stintAverageLapTimeMs = "StintAverageLaptimeMs";
             public static string lastOutlap = "LastOutlap";
+
+            public static string brakePadAverageWearFL = "BrakePadAverageWearFL";
+            public static string brakePadAverageWearFR = "BrakePadAverageWearFR";
+            public static string brakePadAverageWearRL = "BrakePadAverageWearRL";
+            public static string brakePadAverageWearRR = "BrakePadAverageWearRR";
+
+            public static string brakeDiscAverageWearFL = "BrakeDiscAverageWearFL";
+            public static string brakeDiscAverageWearFR = "BrakeDiscAverageWearFR";
+            public static string brakeDiscAverageWearRL = "BrakeDiscAverageWearRL";
+            public static string brakeDiscAverageWearRR = "BrakeDiscAverageWearRR";
+
+            public static string brakeWearLapCount = "BrakeWearLapCount";
+            public static string brakePadPredictedLifeFL = "BrakePadPredicatedLifeFL";
+            public static string brakePadPredictedLifeFR = "BrakePadPredicatedLifeFR";
+            public static string brakePadPredictedLifeRL = "BrakePadPredicatedLifeRL";
+            public static string brakePadPredictedLifeRR = "BrakePadPredicatedLifeRR";
         }
 
         public struct Misc
         {
             public static string currentTyreSet = "CurrentTyreSet";
+            public static string frontBrakePad = "FrontBrakePad";
+            public static string rearBrakePad = "RearBrakePad";
         }
     }
 }
