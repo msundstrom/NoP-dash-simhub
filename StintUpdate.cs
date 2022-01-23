@@ -25,9 +25,9 @@ namespace User.NearlyOnPace
     public class StintUpdate
     {
         public List<TimeSpan> lapTimes = new List<TimeSpan>();
-        public TimeSpan stintStartTime;
-        public TimeSpan stintEndTime = new TimeSpan();
         public List<LapUpdate.Wheels> brakePadWear = new List<LapUpdate.Wheels>();
+        public LapUpdate.Wheels lastBrakePadReading = new LapUpdate.Wheels();
+        public LapUpdate.Wheels lastTyreWearReading = new LapUpdate.Wheels();
         public List<LapUpdate.Wheels> brakeDiscWear = new List<LapUpdate.Wheels>();
         public int stintOutlap;
 
@@ -38,16 +38,12 @@ namespace User.NearlyOnPace
         public StintUpdate(GameData data)
         {
             lapTimes = new List<TimeSpan>();
-            stintStartTime = data.NewData.SessionTimeLeft;
-            stintEndTime = new TimeSpan();
             stintOutlap = data.NewData.CurrentLap;
         }
 
         public StintUpdate()
         {
             lapTimes = new List<TimeSpan>();
-            stintStartTime = new TimeSpan();
-            stintEndTime = new TimeSpan();
             stintOutlap = 1;
         }
 
@@ -139,13 +135,13 @@ namespace User.NearlyOnPace
             lapTimes.Add(data.NewData.LastLapTime);
         }
 
-        public void updatePhysicsProps(Physics graphics)
+        public void updatePhysicsProps(Physics physics)
         {
             brakeDiscWear.Add(new LapUpdate.Wheels(
-                graphics.discLife[0],
-                graphics.discLife[1],
-                graphics.discLife[2],
-                graphics.discLife[3]
+                physics.discLife[0],
+                physics.discLife[1],
+                physics.discLife[2],
+                physics.discLife[3]
             ));
 
             if (brakeDiscWear.Count > 10)
@@ -154,16 +150,30 @@ namespace User.NearlyOnPace
             }
 
             brakePadWear.Add(new LapUpdate.Wheels(
-                graphics.padLife[0],
-                graphics.padLife[1],
-                graphics.padLife[2],
-                graphics.padLife[3]
+                physics.padLife[0],
+                physics.padLife[1],
+                physics.padLife[2],
+                physics.padLife[3]
             ));
 
             if (brakePadWear.Count > 10)
             {
                 brakePadWear.RemoveAt(0);
             }
+
+            lastBrakePadReading = new LapUpdate.Wheels(
+                physics.padLife[0],
+                physics.padLife[1],
+                physics.padLife[2],
+                physics.padLife[3]
+            );
+
+            lastTyreWearReading = new LapUpdate.Wheels(
+                physics.TyreWear[0],
+                physics.TyreWear[1],
+                physics.TyreWear[2],
+                physics.TyreWear[3]
+            );
         }
 
         public void writeSimhubProps(PluginManager pluginManager)
@@ -185,15 +195,20 @@ namespace User.NearlyOnPace
 
             pluginManager.updateProp(Properties.Stint.brakeWearLapCount, brakeDiscWear.Count);
 
-            double padPredicatedLifeFL = (averagePadWear.FL - padCriticalValue) * averagePadWear.FL * averageLapTimeMs();
-            double padPredicatedLifeFR = (averagePadWear.FR - padCriticalValue) * averagePadWear.FR * averageLapTimeMs();
-            double padPredicatedLifeRL = (averagePadWear.RL - padCriticalValue) * averagePadWear.RL * averageLapTimeMs();
-            double padPredicatedLifeRR = (averagePadWear.RR - padCriticalValue) * averagePadWear.RR * averageLapTimeMs();
+            double padPredicatedLifeFL = (lastBrakePadReading.FL - padCriticalValue) / averagePadWear.FL * averageLapTimeMs();
+            double padPredicatedLifeFR = (lastBrakePadReading.FR - padCriticalValue) / averagePadWear.FR * averageLapTimeMs();
+            double padPredicatedLifeRL = (lastBrakePadReading.RL - padCriticalValue) / averagePadWear.RL * averageLapTimeMs();
+            double padPredicatedLifeRR = (lastBrakePadReading.RR - padCriticalValue) / averagePadWear.RR * averageLapTimeMs();
             pluginManager.updateProp(Properties.Stint.brakePadPredictedLifeFL, padPredicatedLifeFL);
             pluginManager.updateProp(Properties.Stint.brakePadPredictedLifeFR, padPredicatedLifeFR);
             pluginManager.updateProp(Properties.Stint.brakePadPredictedLifeRL, padPredicatedLifeRL);
             pluginManager.updateProp(Properties.Stint.brakePadPredictedLifeRR, padPredicatedLifeRR);
 
+
+            pluginManager.updateProp(Properties.Stint.tyreWearFL, lastTyreWearReading.FL);
+            pluginManager.updateProp(Properties.Stint.tyreWearFR, lastTyreWearReading.FR);
+            pluginManager.updateProp(Properties.Stint.tyreWearRL, lastTyreWearReading.RL);
+            pluginManager.updateProp(Properties.Stint.tyreWearRR, lastTyreWearReading.RR);
         }
     }
 }

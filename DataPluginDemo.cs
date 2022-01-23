@@ -98,6 +98,18 @@ namespace User.NearlyOnPace
             if (data.OldData.IsInPitLane == 1 && data.NewData.IsInPitLane == 0)
             {
                 outlapUpdate(pluginManager, data);
+                pluginManager.updateProp(
+                    Properties.Stint.stintStartSessionTime, 
+                    data.NewData.SessionTimeLeft.TotalMilliseconds
+                    );
+            }
+
+            // stint done
+            if (data.OldData.IsInPitLane == 0 && data.NewData.IsInPitLane == 1) {
+                pluginManager.updateProp(
+                    Properties.Stint.stintEndSessionTime,
+                    data.NewData.SessionTimeLeft.TotalMilliseconds
+                    );
             }
 
             // other, constant updates
@@ -133,8 +145,8 @@ namespace User.NearlyOnPace
         private void updateConstants(PluginManager pluginManager, Graphics currentGraphics, Physics currentPhysics)
         {
             pluginManager.updateProp(Properties.Misc.currentTyreSet, currentGraphics.currentTyreSet);
-            pluginManager.updateProp(Properties.Misc.frontBrakePad, currentPhysics.fontBrakeCompound);
-            pluginManager.updateProp(Properties.Misc.rearBrakePad, currentPhysics.rearBrakeCompound);
+            pluginManager.updateProp(Properties.Misc.frontBrakePad, currentPhysics.fontBrakeCompound + 1);
+            pluginManager.updateProp(Properties.Misc.rearBrakePad, currentPhysics.rearBrakeCompound + 1);
             pluginManager.updateProp(Properties.Weather.trackCondition, currentGraphics.trackStatus);
             pluginManager.updateProp(Properties.Weather.rainIntensity, (int)currentGraphics.rainIntensity);
             pluginManager.updateProp(Properties.Weather.rainIntensityIn10min, (int)currentGraphics.rainIntensityIn10min);
@@ -211,6 +223,8 @@ namespace User.NearlyOnPace
 
             pluginManager.addProp(Properties.Stint.stintAverageLapTime, "-");
             pluginManager.addProp(Properties.Stint.stintAverageLapTimeMs, -1);
+            pluginManager.addProp(Properties.Stint.stintStartSessionTime, -1);
+            pluginManager.addProp(Properties.Stint.stintEndSessionTime, -1);
             pluginManager.addProp(Properties.Stint.lastOutlap, -1);
             pluginManager.addProp(Properties.Stint.brakePadAverageWearFL, -1.0);
             pluginManager.addProp(Properties.Stint.brakePadAverageWearFR, -1.0);
@@ -226,6 +240,11 @@ namespace User.NearlyOnPace
             pluginManager.addProp(Properties.Stint.brakePadPredictedLifeFR, -1);
             pluginManager.addProp(Properties.Stint.brakePadPredictedLifeRL, -1);
             pluginManager.addProp(Properties.Stint.brakePadPredictedLifeRR, -1);
+
+            pluginManager.addProp(Properties.Stint.tyreWearFL, -1);
+            pluginManager.addProp(Properties.Stint.tyreWearFR, -1);
+            pluginManager.addProp(Properties.Stint.tyreWearRL, -1);
+            pluginManager.addProp(Properties.Stint.tyreWearRR, -1);
         }
     }
 }

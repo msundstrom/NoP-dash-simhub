@@ -175,8 +175,8 @@ namespace User.NearlyOnPace
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         public float[] brakePressure;
 
-        public float fontBrakeCompound;
-        public float rearBrakeCompound;
+        public int fontBrakeCompound;
+        public int rearBrakeCompound;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         public float[] padLife;

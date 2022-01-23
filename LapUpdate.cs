@@ -110,16 +110,16 @@ namespace User.NearlyOnPace
             pluginManager.updateProp(Properties.PSI.lastLapMaxRR, maxPsi.RR);
 
             LapUpdate.Wheels averageTemp = averageTemps();
-            pluginManager.updateProp(Properties.PSI.lastLapAverageFL, averageTemp.FL);
-            pluginManager.updateProp(Properties.PSI.lastLapAverageFR, averageTemp.FR);
-            pluginManager.updateProp(Properties.PSI.lastLapAverageRL, averageTemp.RL);
-            pluginManager.updateProp(Properties.PSI.lastLapAverageRR, averageTemp.RR);
+            pluginManager.updateProp(Properties.Temp.lastLapAverageFL, averageTemp.FL);
+            pluginManager.updateProp(Properties.Temp.lastLapAverageFR, averageTemp.FR);
+            pluginManager.updateProp(Properties.Temp.lastLapAverageRL, averageTemp.RL);
+            pluginManager.updateProp(Properties.Temp.lastLapAverageRR, averageTemp.RR);
 
             LapUpdate.Wheels maxTemp = maxTemps();
-            pluginManager.updateProp(Properties.PSI.lastLapMaxFL, maxTemp.FL);
-            pluginManager.updateProp(Properties.PSI.lastLapMaxFR, maxTemp.FR);
-            pluginManager.updateProp(Properties.PSI.lastLapMaxRL, maxTemp.RL);
-            pluginManager.updateProp(Properties.PSI.lastLapMaxRR, maxTemp.RR);
+            pluginManager.updateProp(Properties.Temp.lastLapMaxFL, maxTemp.FL);
+            pluginManager.updateProp(Properties.Temp.lastLapMaxFR, maxTemp.FR);
+            pluginManager.updateProp(Properties.Temp.lastLapMaxRL, maxTemp.RL);
+            pluginManager.updateProp(Properties.Temp.lastLapMaxRR, maxTemp.RR);
         }
     }
 }
