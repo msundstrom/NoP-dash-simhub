@@ -21,6 +21,10 @@ namespace User.NearlyOnPace
             public static string lastLapAverageFR = "LastLapAveragePsiFR";
             public static string lastLapAverageRL = "LastLapAveragePsiRL";
             public static string lastLapAverageRR = "LastLapAveragePsiRR";
+
+            public static string pressureLossDetected = "PressureLossDetected";
+            public static string pressureLossWheels = "PressureLossWheels";
+            public static string pressureLossTrackPosition = "PressureLossTrackPosition";
         }
         public struct Temp
         {
@@ -48,6 +52,8 @@ namespace User.NearlyOnPace
             public static string stintAverageLapTime = "StintAverageLaptime";
             public static string stintAverageLapTimeMs = "StintAverageLaptimeMs";
             public static string lastOutlap = "LastOutlap";
+            public static string stintStartSessionTime = "StintStartSessionTime";
+            public static string stintEndSessionTime = "StintEndSessionTime";
 
             public static string brakePadAverageWearFL = "BrakePadAverageWearFL";
             public static string brakePadAverageWearFR = "BrakePadAverageWearFR";
@@ -64,6 +70,11 @@ namespace User.NearlyOnPace
             public static string brakePadPredictedLifeFR = "BrakePadPredicatedLifeFR";
             public static string brakePadPredictedLifeRL = "BrakePadPredicatedLifeRL";
             public static string brakePadPredictedLifeRR = "BrakePadPredicatedLifeRR";
+
+            public static string tyreWearFL = "TyreWearFL";
+            public static string tyreWearFR = "TyreWearFR";
+            public static string tyreWearRR = "TyreWearRR";
+            public static string tyreWearRL = "TyreWearRL";
         }
 
         public struct Misc
