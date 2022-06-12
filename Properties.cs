@@ -45,6 +45,9 @@ namespace User.NearlyOnPace
             public static string rainIntensity = "RainIntensity";
             public static string rainIntensityIn10min = "RainIntensityIn10min";
             public static string rainIntensityIn30min = "RainIntensityIn30min";
+            public static string lastRainIntensityChange = "LastRainIntensityChange";
+            public static string lastRainIntensityChange10min = "LastRainIntensityChange10min";
+            public static string lastRainIntensityChange30min = "LastRainIntensityChange30min";
         }
 
         public struct Stint
