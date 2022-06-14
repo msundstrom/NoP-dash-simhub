@@ -19,7 +19,6 @@ public static class Extensions
     }
 }
 
-
 namespace User.NearlyOnPace
 {
     public class StintUpdate
@@ -31,9 +30,7 @@ namespace User.NearlyOnPace
         public List<LapUpdate.Wheels> brakeDiscWear = new List<LapUpdate.Wheels>();
         public int stintOutlap;
 
-        private double startingPadValue = 29.0;
-        private double padCriticalValue = 10.0;
-        private double startinDiscValue = 32.0;
+        private double padCriticalValue = 12.5;
 
         public StintUpdate(GameData data)
         {
@@ -203,7 +200,6 @@ namespace User.NearlyOnPace
             pluginManager.updateProp(Properties.Stint.brakePadPredictedLifeFR, padPredicatedLifeFR);
             pluginManager.updateProp(Properties.Stint.brakePadPredictedLifeRL, padPredicatedLifeRL);
             pluginManager.updateProp(Properties.Stint.brakePadPredictedLifeRR, padPredicatedLifeRR);
-
 
             pluginManager.updateProp(Properties.Stint.tyreWearFL, lastTyreWearReading.FL);
             pluginManager.updateProp(Properties.Stint.tyreWearFR, lastTyreWearReading.FR);

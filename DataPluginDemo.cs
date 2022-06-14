@@ -49,6 +49,8 @@ namespace User.NearlyOnPace
         private LapUpdate currentLapUpdate;
         private StintUpdate currentStintUpdate;
 
+        private WeatherManager weatherManager = new WeatherManager();
+
         /// <summary>
         /// Instance of the current plugin manager
         /// </summary>
@@ -104,6 +106,9 @@ namespace User.NearlyOnPace
                     );
             }
 
+            // weather updates
+            updateWeatherTimestamps(pluginManager, (Graphics)currentGraphics);
+
             // stint done
             if (data.OldData.IsInPitLane == 0 && data.NewData.IsInPitLane == 1) {
                 pluginManager.updateProp(
@@ -151,6 +156,16 @@ namespace User.NearlyOnPace
             pluginManager.updateProp(Properties.Weather.rainIntensity, (int)currentGraphics.rainIntensity);
             pluginManager.updateProp(Properties.Weather.rainIntensityIn10min, (int)currentGraphics.rainIntensityIn10min);
             pluginManager.updateProp(Properties.Weather.rainIntensityIn30min, (int)currentGraphics.rainIntensityIn30min);
+        }
+
+        private void updateWeatherTimestamps(PluginManager pluginManager, Graphics currentGraphics) {
+            bool didUpdate = weatherManager.updateTimestamps(currentGraphics);
+
+            if (didUpdate) {
+                pluginManager.updateProp(Properties.Weather.lastRainIntensityChange, weatherManager.currentWeatherChangeTimestamp);
+                pluginManager.updateProp(Properties.Weather.lastRainIntensityChange10min, weatherManager.in10minWeatherChangeTimestamp);
+                pluginManager.updateProp(Properties.Weather.lastRainIntensityChange30min, weatherManager.in30minWeatherChangeTimestamp);
+            }
         }
 
         /// <summary>
@@ -220,6 +235,9 @@ namespace User.NearlyOnPace
             pluginManager.addProp(Properties.Weather.rainIntensity, -1);
             pluginManager.addProp(Properties.Weather.rainIntensityIn10min, -1);
             pluginManager.addProp(Properties.Weather.rainIntensityIn30min, -1);
+            pluginManager.addProp(Properties.Weather.lastRainIntensityChange, -1);
+            pluginManager.addProp(Properties.Weather.lastRainIntensityChange10min, -1);
+            pluginManager.addProp(Properties.Weather.lastRainIntensityChange30min, -1);
 
             pluginManager.addProp(Properties.Stint.stintAverageLapTime, "-");
             pluginManager.addProp(Properties.Stint.stintAverageLapTimeMs, -1);
